@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
+builder.Services.AddControllers() ;
 
 // Add database services configuration
 builder.Services.AddDbContext<ApplicationDbContext>(
@@ -27,6 +28,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -40,7 +43,13 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseAuthentication() ;
-app.UseAuthorization()  ;
-
+// app.UseAuthentication() ;
+// app.UseAuthorization()  ;
+// app.UseRouting() ;
+// app.UseEndPoints(
+//     endpoints => {
+//         endpoints.MapControllers() ;
+//     }
+// );
+app.MapControllers() ;
 app.Run();

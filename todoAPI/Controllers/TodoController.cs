@@ -5,6 +5,7 @@ using System.Threading.Tasks ;
 using System.Collections.Generic ;
 
 using todoAPI.Data ;
+using todoAPI.Models ;
 
 namespace todoAPI.Controllers
 {
@@ -31,7 +32,16 @@ namespace todoAPI.Controllers
             [FromBody] TodoModel model 
         )
         {
-            // To be implmented
+            model.Created = DateTime.Now ;
+            model.Modified = DateTime.Now ;
+
+            _context.Todos.Add(model) ;
+            await _context.SaveChangesAsync() ;
+            return CreatedAtAction(
+                nameof(GetTodoDetails),
+                new { id = model.TodoId },
+                model
+            ) ;
         }
 
         // PUT: api/todo/{id}
@@ -42,7 +52,27 @@ namespace todoAPI.Controllers
             [FromBody] TodoModel model
         )
         {
-            // To be implemented
+            // Get todo
+            if ( id != model.TodoId )
+            {
+                return BadRequest();
+            }
+            _context.Entry(model).State = EntityState.Modified ;
+            try {
+                model.Modified = DateTime.Now ;
+                await _context.SaveChangesAsync() ;
+            }catch(
+                DbUpdateConcurrencyException
+            ){
+                // Check if Todo exists.
+                if ( ! _context.Todos.Any( e => e.TodoId == id ) )
+                {
+                    return NotFound() ;
+                }
+                throw ;
+            }
+
+            return NoContent() ;
         }
 
         // DELETE: api/todo/{id}
@@ -52,23 +82,41 @@ namespace todoAPI.Controllers
             Guid id
         )
         {
-            // To be implemented
+            var todo = await _context.Todos.FindAsync( id ) ;
+            if ( null == todo )
+            {
+                return NotFound() ;
+            }
+
+            _context.Todos.Remove(todo) ;
+            await _context.SaveChangesAsync() ;
+
+            return NoContent() ;
         }
 
         // GET: api/todo
         // This API is used to get all todo data records
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoModel>>> GetTodos()
         {
-            // To be implemented
+            var todos = await _context.Todos.ToListAsync() ;
+            return Ok(todos) ;
         }
 
         // GET: api/todo/{id}
         // This API is used to get todo details
-        public async Task<ActionResult<TodoModel>> GetTodo(
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TodoModel>> GetTodoDetails(
             Guid id
         )
         {
-            // To be implmeneted
+            var todo = await _context.Todos.FindAsync( id ) ;
+            if ( null == todo )
+            {
+                return NotFound() ;
+            }
+
+            return Ok(todo) ;
         }
     }
 }
