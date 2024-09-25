@@ -7,9 +7,6 @@ using todoAPI.Data ;
 var builder = WebApplication.CreateBuilder(args);
 
 
-// Add services to the container.
-builder.Services.AddControllers() ;
-
 // Add database services configuration
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => {
@@ -18,6 +15,21 @@ builder.Services.AddDbContext<ApplicationDbContext>(
         ) ;
     }
 ) ;
+
+// Add CORS Policy
+builder.Services.AddCors(
+    options => {
+        options.AddPolicy(
+            "AllowAllOrigins",
+            builder => builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+        );
+    }
+) ;
+
+// Add services to the container.
+builder.Services.AddControllers() ;
 
 // Add IdentityRole
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -51,5 +63,7 @@ else
 //         endpoints.MapControllers() ;
 //     }
 // );
+
+app.UseCors("AllowAllOrigins") ;
 app.MapControllers() ;
 app.Run();
